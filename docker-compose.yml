@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  backend:
+    container_name: ddz_backend
+    image: registry.cn-hangzhou.aliyuncs.com/zmscode/backend:1.0.0
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
+    volumes:
+      - "./back_end/logs:/usr/src/back_end/logs"
+    command: pm2-runtime start ./start.config.js
+    depends_on:
+      - mysql
+      - redis
+
+  mysql:
+    container_name: ddz_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./mysql/conf/my.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf"
+      - "./mysql/logs:/logs"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/init:/docker-entrypoint-initdb.d/"
+    restart: always
+
+  redis:
+    container_name: ddz_redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./redis/data:/data"
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
